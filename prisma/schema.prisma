@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+model User {
+  id                Int             @id @default(autoincrement())
+  nome              String
+  email             String          @unique
+  phone             String?
+  created_at        DateTime        @default(now())
+  role              Role            @default(MEMBER)
+  image_path        String?
+  isAlive           Boolean         @default(false)
+  messages          messages[]
+  Posts             Posts[]
+  notifications     notifications[]
+  React             React[]
+  sent_messages     MessagesOff[]   @relation("sender") // Mensagens enviadas
+  received_messages MessagesOff[]   @relation("receiver") // Mensagens recebidas
+  Comment           Comment[]
+
+  @@map("users")
+}
+
+model messages {
+  id         Int      @id @default(autoincrement())
+  content    String
+  created_at DateTime @default(now())
+  isMe       Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+}
+
+model Posts {
+  id         Int       @id @default(autoincrement())
+  content    String
+  image_path String?
+  react      Int       @default(0)
+  created_at DateTime  @default(now())
+  users      User      @relation(fields: [userId], references: [id])
+  userId     Int
+  React      React[]
+  Comment    Comment[]
+}
+
+model notifications {
+  id         Int      @id @default(autoincrement())
+  content    String
+  created_at DateTime @default(now())
+  users      User     @relation(fields: [userId], references: [id])
+  userId     Int
+}
+
+model React {
+  id      Int   @id @default(autoincrement())
+  post    Posts @relation(fields: [postsId], references: [id])
+  postsId Int
+  react   Int?
+  user    User  @relation(fields: [userId], references: [id])
+  userId  Int
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  content    String
+  created_at DateTime @default(now())
+  posts      Posts    @relation(fields: [postsId], references: [id])
+  postsId    Int
+  userId     Int
+  users      User     @relation(fields: [userId], references: [id])
+}
+
+model MessagesOff {
+  id         Int      @id @default(autoincrement())
+  content    String
+  data       String?
+  send_at    DateTime @default(now())
+  senderId   Int
+  status     Boolean  @default(false)
+  receiverId Int
+  sender     User     @relation("sender", fields: [senderId], references: [id])
+  receiver   User     @relation("receiver", fields: [receiverId], references: [id])
+
+}
+
