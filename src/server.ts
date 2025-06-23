@@ -44,17 +44,27 @@ app.register(fastifyJwt,{
 
 export const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Permite conexões do frontend
+    origin: "https://quintal.onrender.com", // Permite conexões do frontend
     methods: ["GET", "POST"],
   },
 });
 
+// Configuração de produção/desenvolvimento
+// const corsOptions = {
+//   origin: process.env.NODE_ENV === 'dev' 
+//     ? 'http://localhost:5173' 
+//     : 'https://seu-frontend.com',
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true
+// };
+
 app.register(cors, {
-  origin: 'http://localhost:5173', // Permite apenas o frontend (React)
+  origin: 'https://quintal.onrender.com', // Permite apenas o frontend (React)
   methods: ['GET', 'POST', 'PUT', 'DELETE ','PATCH'], // Métodos permitidos
   allowedHeaders: ['Content-Type', 'Authorization'], // Cabeçalhos permitidos
   credentials:true
-});
+}, );
 
 
 // app.register(SensorRoutes)
