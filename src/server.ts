@@ -28,7 +28,7 @@ app.register(multipart);
 // });local
 
 app.register(fastifyStatic, {
-  root: path.join(__dirname, "..", "uploads"),
+  root: path.join(__dirname,"uploads"),
   prefix: "/uploads/",
 });
 
