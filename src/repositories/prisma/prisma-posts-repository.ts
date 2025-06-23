@@ -112,6 +112,7 @@ export class PrismaPostsRepository implements postssRepository{
                         created_at:'desc'
                     }
                 })
+                
                 return posts
                 
             }      

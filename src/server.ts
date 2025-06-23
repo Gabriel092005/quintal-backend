@@ -1,8 +1,7 @@
-import Fastify, { FastifyRequest, FastifyReply } from "fastify";
+import Fastify from "fastify";
 import { Server } from "socket.io";
 import { UsersRoutes } from "./http/controllers/users/routes";
 import { env } from "./Env";
-import OpenAI from 'openai'
 import cors  from'@fastify/cors'
 import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
