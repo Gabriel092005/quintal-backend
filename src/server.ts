@@ -22,13 +22,18 @@ const server = app.server;
 
 // Configurações essenciais
 app.register(multipart);
+// app.register(fastifyStatic, {
+//   root: path.join(__dirname, "./http/controllers/uploads"),
+//   prefix: "/uploads/",
+// });local
+
 app.register(fastifyStatic, {
-  root: path.join(__dirname, "./http/controllers/uploads"),
+  root: path.join(__dirname, "..", "uploads"),
   prefix: "/uploads/",
 });
 
 // Segurança e Autenticação
-app.register(fastifyJwt, {
+  app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
   cookie: { cookieName: 'refreshToken', signed: false },
   sign: { expiresIn: '10m' }
