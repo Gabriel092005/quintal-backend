@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { Server } from "socket.io";
 import { UsersRoutes } from "./http/controllers/users/routes";
 import { env } from "./Env";
@@ -15,85 +15,75 @@ import { CommentsRoutes } from "./http/controllers/comments/routes";
 
 
 
+// ... (imports permanecem iguais)
+
 const app = Fastify();
 const server = app.server;
 
-app.register(multipart)
-
+// Configurações essenciais
+app.register(multipart);
 app.register(fastifyStatic, {
-  root: path.join(__dirname, "./http/controllers/uploads"), 
+  root: path.join(__dirname, "./http/controllers/uploads"),
   prefix: "/uploads/",
-}); 
-
-
-
-app.register(fastifyJwt,{
-    secret : env.JWT_SECRET,
-    cookie:{
-        cookieName:'refreshToken',
-        signed:false,
-    },
-    sign:{
-        expiresIn : '10m'
-    },
-
-    
-}) 
-
-
-
-export const io = new Server(server, {
-  cors: {
-    origin: "https://quintal.onrender.com", // Permite conexões do frontend
-    methods: ["GET", "POST"],
-  },
 });
 
-// Configuração de produção/desenvolvimento
-// const corsOptions = {
-//   origin: process.env.NODE_ENV === 'dev' 
-//     ? 'http://localhost:5173' 
-//     : 'https://seu-frontend.com',
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   credentials: true
-// };
+// Segurança e Autenticação
+app.register(fastifyJwt, {
+  secret: env.JWT_SECRET,
+  cookie: { cookieName: 'refreshToken', signed: false },
+  sign: { expiresIn: '10m' }
+});
 
+app.register(fastifyCookie);
+
+// CORS Aprimorado
 app.register(cors, {
-  origin: 'https://quintal.onrender.com', // Permite apenas o frontend (React)
-  methods: ['GET', 'POST', 'PUT', 'DELETE ','PATCH'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // Cabeçalhos permitidos
-  credentials:true
-}, );
+  origin: [
+    'https://quintal.onrender.com',
+    'http://localhost:5173'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: true,
+  exposedHeaders: ['Authorization']
+});
 
+// Socket.IO
+export const io = new Server(server, {
+  cors: {
+    origin: [
+      'https://quintal.onrender.com',
+      'http://localhost:5173'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
 
-// app.register(SensorRoutes)
-app.register(UsersRoutes)
-app.register(postsRoutes)
-app.register(MessagesRoutes)
-app.register(CommentsRoutes)
-app.register(fastifyCookie)
+// Rotas
+app.register(UsersRoutes);
+app.register(postsRoutes);
+app.register(MessagesRoutes);
+app.register(CommentsRoutes);
 
+// Socket Events
 io.on("connection", (socket) => {
   console.log("Cliente conectado:", socket.id);
-   socket.on("register", (userId) => {
-    socket.join(userId); // Associa o socket a uma "sala" com o ID do usuário
+  socket.on("register", (userId) => {
+    socket.join(userId);
   });
-  
   socket.on("disconnect", () => {
     console.log("Cliente desconectado:", socket.id);
   });
 });
 
-
-// Iniciar o servidor
+// Inicialização
 const start = async () => {
   try {
-    await app.listen(
-      { port: env.PORT ,
-        host:'0.0.0.0'
-
-      }); // Usar await para garantir que o servidor esteja rodando
+    await app.listen({
+      port: env.PORT,
+      host: '0.0.0.0'
+    });
     console.log("Servidor rodando 🐱‍🏍");
   } catch (err) {
     console.error("Erro ao iniciar o servidor:", err);
