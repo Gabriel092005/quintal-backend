@@ -32,6 +32,15 @@ app.register(fastifyStatic, {
   prefix: "/uploads/",
 });
 
+app.register(fastifyStatic, {
+  root: path.join(__dirname, '..', 'dist'),
+  prefix: "/",
+});
+
+app.setNotFoundHandler((req, reply) => {
+  reply.type("text/html").sendFile("index.html");
+});
+
 // Segurança e Autenticação
   app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
