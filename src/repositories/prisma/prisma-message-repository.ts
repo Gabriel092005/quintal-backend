@@ -43,7 +43,7 @@ export class PrismaMessageRepository implements messageRepository{
                     }
                 }
             },orderBy:{
-                created_at:'desc'
+                created_at:'asc'
             }
          })
                 return messages
